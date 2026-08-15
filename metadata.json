@@ -1,0 +1,7 @@
+{
+  "name": "BioAR Board",
+  "description": "Image Recognition AR Biology Bulletin Board App matching student hand-drawn posters to rotatable 3D biological models with synchronized student voice-overs and MP4 presentations.",
+  "requestFramePermissions": ["camera", "microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+

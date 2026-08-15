@@ -1,0 +1,58 @@
+{
+  "entities": {
+    "Project": {
+      "title": "Project",
+      "description": "Student biology AR poster project with marker image, 3D model, video presentation, and metadata",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "studentName": { "type": "string" },
+        "grade": { "type": "string" },
+        "topic": { "type": "string" },
+        "description": { "type": "string" },
+        "markerImage": { "type": "string" },
+        "videoUrl": { "type": "string" },
+        "modelUrl": { "type": "string" },
+        "modelType": { "type": "string" },
+        "modelScale": { "type": "number" },
+        "teacherId": { "type": "string" },
+        "teacherName": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "keyPoints": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["title", "studentName", "grade", "topic", "markerImage", "createdAt"]
+    },
+    "Library3DModel": {
+      "title": "Library3DModel",
+      "description": "3D Biological asset or diagram in the shared library",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "category": { "type": "string" },
+        "description": { "type": "string" },
+        "modelType": { "type": "string" },
+        "modelUrl": { "type": "string" },
+        "scale": { "type": "number" },
+        "authorName": { "type": "string" },
+        "fileFormat": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["name", "category", "modelType", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/projects/{projectId}": {
+      "schema": "Project",
+      "description": "Student science AR projects"
+    },
+    "/biology_3d_models/{modelId}": {
+      "schema": "Library3DModel",
+      "description": "3D biology models and diagrams"
+    }
+  }
+}
