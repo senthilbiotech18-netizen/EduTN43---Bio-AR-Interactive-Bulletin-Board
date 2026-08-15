@@ -1,0 +1,38 @@
+{
+  "name": "BioAR Board - 3D Biology AR Bulletin Board",
+  "short_name": "BioAR Board",
+  "description": "Desktop & Mobile AR Biology Bulletin Board app matching student hand-drawn posters to 3D biological models with video presentations.",
+  "id": "/?source=pwa",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0E1B10",
+  "theme_color": "#1F3D23",
+  "categories": ["education", "science", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "192x192 512x512 any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "AR Viewer",
+      "short_name": "Scanner",
+      "description": "Launch the AR Poster Scanner directly",
+      "url": "/?view=ar_scanner",
+      "icons": [{ "src": "/icon.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Teacher Dashboard",
+      "short_name": "Teacher Hub",
+      "description": "Manage classroom projects and 3D models",
+      "url": "/?view=teacher_dashboard",
+      "icons": [{ "src": "/icon.svg", "sizes": "192x192" }]
+    }
+  ],
+  "prefer_related_applications": false
+}

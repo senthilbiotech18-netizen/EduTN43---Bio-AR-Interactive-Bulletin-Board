@@ -7,6 +7,7 @@ import { TeacherDashboard } from './components/TeacherDashboard';
 import { PostersGalleryModal } from './components/PostersGalleryModal';
 import { ModelLibraryModal } from './components/ModelLibraryModal';
 import { ProjectCreatorModal } from './components/ProjectCreatorModal';
+import { DesktopInstallModal } from './components/DesktopInstallModal';
 import { auth } from './firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 
@@ -18,6 +19,11 @@ export default function App() {
   const [projectToCreateFromModel, setProjectToCreateFromModel] = useState<Project | null>(null);
   const [isCreatorOpenFromLibrary, setIsCreatorOpenFromLibrary] = useState(false);
 
+  // Desktop App Installation & PWA Prompt States
+  const [isInstallModalOpen, setIsInstallModalOpen] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isAppInstalled, setIsAppInstalled] = useState(false);
+
   const [currentUser, setCurrentUser] = useState<UserProfile | null>({
     uid: 'teacher_sarah_jenkins',
     email: 'sarah.jenkins@gsis.edu',
@@ -25,6 +31,27 @@ export default function App() {
     photoURL: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
     role: 'teacher',
   });
+
+  // Listen to PWA install prompt event
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    const handleAppInstalled = () => {
+      setIsAppInstalled(true);
+      setDeferredPrompt(null);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
+  }, []);
 
   // Subscribe to real-time Firestore projects
   useEffect(() => {
@@ -85,6 +112,7 @@ export default function App() {
         onViewChange={setCurrentView}
         onOpenGallery={() => setIsGalleryOpen(true)}
         onOpen3DLibrary={() => setIs3DLibraryOpen(true)}
+        onOpenInstallModal={() => setIsInstallModalOpen(true)}
         projectCount={projects.length}
       />
 
@@ -106,9 +134,21 @@ export default function App() {
             onOpenARScanner={() => setCurrentView('ar_scanner')}
             onOpenGallery={() => setIsGalleryOpen(true)}
             onOpen3DLibrary={() => setIs3DLibraryOpen(true)}
+            onOpenInstallModal={() => setIsInstallModalOpen(true)}
           />
         )}
       </main>
+
+      {/* Desktop App Install & Download Modal */}
+      {isInstallModalOpen && (
+        <DesktopInstallModal
+          onClose={() => setIsInstallModalOpen(false)}
+          deferredPrompt={deferredPrompt}
+          onInstallSuccess={() => {
+            setIsAppInstalled(true);
+          }}
+        />
+      )}
 
       {/* Posters Gallery & Testing Modal */}
       {isGalleryOpen && (

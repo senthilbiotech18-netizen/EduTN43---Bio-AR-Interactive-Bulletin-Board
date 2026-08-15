@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#142817"/>
+      <stop offset="50%" stop-color="#1F3D23"/>
+      <stop offset="100%" stop-color="#0E1B10"/>
+    </linearGradient>
+    <linearGradient id="dnaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="50%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="12" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Rounded App Icon Background -->
+  <rect width="512" height="512" rx="115" fill="url(#bgGrad)" stroke="#2D5A27" stroke-width="8"/>
+
+  <!-- Subtle AR Viewfinder Target Corners -->
+  <path d="M 96 150 L 96 96 L 150 96" fill="none" stroke="#34d399" stroke-width="12" stroke-linecap="round"/>
+  <path d="M 416 150 L 416 96 L 362 96" fill="none" stroke="#34d399" stroke-width="12" stroke-linecap="round"/>
+  <path d="M 96 362 L 96 416 L 150 416" fill="none" stroke="#34d399" stroke-width="12" stroke-linecap="round"/>
+  <path d="M 416 362 L 416 416 L 362 416" fill="none" stroke="#34d399" stroke-width="12" stroke-linecap="round"/>
+
+  <!-- 3D Cube / Biology AR Core Symbol -->
+  <g transform="translate(256, 256) scale(0.9)" filter="url(#glow)">
+    <!-- DNA Strand Waves -->
+    <path d="M -110 -130 Q -60 -40 0 0 Q 60 40 110 130" fill="none" stroke="#6ee7b7" stroke-width="16" stroke-linecap="round"/>
+    <path d="M 110 -130 Q 60 -40 0 0 Q -60 40 -110 130" fill="none" stroke="#10b981" stroke-width="16" stroke-linecap="round"/>
+
+    <!-- Base pairs -->
+    <line x1="-80" y1="-90" x2="80" y2="-90" stroke="#a7f3d0" stroke-width="10" stroke-linecap="round"/>
+    <line x1="-45" y1="-45" x2="45" y2="-45" stroke="#a7f3d0" stroke-width="10" stroke-linecap="round"/>
+    <line x1="-45" y1="45" x2="45" y2="45" stroke="#a7f3d0" stroke-width="10" stroke-linecap="round"/>
+    <line x1="-80" y1="90" x2="80" y2="90" stroke="#a7f3d0" stroke-width="10" stroke-linecap="round"/>
+
+    <!-- Center Nucleus Sphere -->
+    <circle cx="0" cy="0" r="32" fill="#34d399" stroke="#ffffff" stroke-width="6"/>
+    <circle cx="-8" cy="-8" r="8" fill="#ffffff" opacity="0.8"/>
+  </g>
+</svg>

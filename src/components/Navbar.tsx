@@ -7,10 +7,12 @@ import {
   Eye, 
   Dna, 
   Grid, 
-  ShieldCheck,
-  Smartphone,
-  Box,
-  Plus
+  ShieldCheck, 
+  Smartphone, 
+  Box, 
+  Plus,
+  Download,
+  Laptop
 } from 'lucide-react';
 import { ViewMode } from '../types';
 
@@ -19,7 +21,9 @@ interface NavbarProps {
   onViewChange: (mode: ViewMode) => void;
   onOpenGallery: () => void;
   onOpen3DLibrary: () => void;
+  onOpenInstallModal?: () => void;
   projectCount: number;
+  isInstallable?: boolean;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -27,7 +31,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   onViewChange,
   onOpenGallery,
   onOpen3DLibrary,
+  onOpenInstallModal,
   projectCount,
+  isInstallable = true,
 }) => {
   return (
     <header className="sticky top-0 z-40 w-full bg-[#F4F7F5]/90 dark:bg-[#132416]/90 backdrop-blur-xl border-b border-[#2D5A27]/15 dark:border-[#2D5A27]/30 transition-colors">
@@ -98,6 +104,19 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Right Tools */}
         <div className="flex items-center gap-2">
+          {onOpenInstallModal && (
+            <button
+              id="btn-nav-install-desktop"
+              type="button"
+              onClick={onOpenInstallModal}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-emerald-100/80 dark:bg-emerald-950/70 hover:bg-emerald-200/90 dark:hover:bg-emerald-900/90 text-[#2D5A27] dark:text-emerald-300 text-xs font-bold border border-emerald-300/60 dark:border-emerald-800 shadow-xs transition hover:scale-105"
+              title="Download / Install Desktop App for Chromebook, Windows, Mac"
+            >
+              <Download className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400" />
+              <span className="hidden sm:inline">Install App</span>
+            </button>
+          )}
+
           <button
             id="btn-nav-gallery"
             type="button"

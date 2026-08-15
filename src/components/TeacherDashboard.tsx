@@ -36,6 +36,7 @@ interface TeacherDashboardProps {
   onOpenARScanner: () => void;
   onOpenGallery: () => void;
   onOpen3DLibrary?: () => void;
+  onOpenInstallModal?: () => void;
 }
 
 export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
@@ -45,6 +46,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
   onOpenARScanner,
   onOpenGallery,
   onOpen3DLibrary,
+  onOpenInstallModal,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedGrade, setSelectedGrade] = useState('all');
@@ -191,6 +193,18 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
               >
                 <LogIn className="w-4 h-4 text-[#2D5A27]" />
                 <span>Sign in with Google</span>
+              </button>
+            )}
+
+            {onOpenInstallModal && (
+              <button
+                id="btn-open-install-dashboard"
+                onClick={onOpenInstallModal}
+                className="flex items-center gap-1.5 px-4 py-2.5 rounded-2xl bg-emerald-900/60 hover:bg-emerald-800/80 active:scale-98 text-emerald-200 border border-emerald-600/50 text-xs font-bold transition shadow-xs"
+                title="Download / Install Desktop App for Chromebook, Windows, Mac"
+              >
+                <Download className="w-4 h-4 text-emerald-300" />
+                <span>Install Desktop App</span>
               </button>
             )}
 

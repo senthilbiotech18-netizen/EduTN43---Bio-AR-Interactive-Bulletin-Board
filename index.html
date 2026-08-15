@@ -8,13 +8,28 @@
     <meta property="og:title" content="BioAR Board - AR Biology Bulletin Board" />
     <meta property="og:description" content="Recognize hand-drawn biology posters and bring them to life with 3D organelle models and student video explanations." />
     <meta property="og:type" content="website" />
-    <meta name="theme-color" content="#10b981" />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/icon.svg" />
+    <meta name="theme-color" content="#1F3D23" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="BioAR Board" />
+    <meta name="application-name" content="BioAR Board" />
   </head>
   <body class="bg-slate-950 text-slate-100 overflow-x-hidden">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch((err) => {
+            console.log('ServiceWorker registration note:', err);
+          });
+        });
+      }
+    </script>
   </body>
 </html>
 
