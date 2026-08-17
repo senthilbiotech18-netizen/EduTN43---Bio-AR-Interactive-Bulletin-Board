@@ -129,15 +129,25 @@ export async function extractFeaturesFromImage(imageSource: HTMLImageElement | H
 }
 
 // Compare two feature vectors and return match confidence (0.0 - 1.0)
+// Uses strict multi-dimensional checking (Hash distance + spatial color + edge histogram)
 export function compareFeatures(featA: ImageFeatureVector, featB: ImageFeatureVector): number {
   const hashDist = hammingDistance(featA.dHash, featB.dHash);
-  const hashSim = Math.max(0, 1 - (hashDist / 64)); // 64 bits
+  // Stricter hash threshold: Max 18 differing bits out of 64
+  if (hashDist > 20) {
+    return 0; // Completely reject dissimilar structural patterns
+  }
 
+  const hashSim = Math.max(0, 1 - (hashDist / 40)); 
   const colorSim = Math.max(0, cosineSimilarity(featA.colorGrid, featB.colorGrid));
   const edgeSim = Math.max(0, cosineSimilarity(featA.edgeHist, featB.edgeHist));
 
-  // Weighted fusion: Color signature (35%), Spatial edges (35%), Perceptual dHash (30%)
-  const confidence = (colorSim * 0.38) + (edgeSim * 0.32) + (hashSim * 0.30);
+  // Must satisfy all components to prevent triggering on arbitrary random walls or objects
+  if (colorSim < 0.65 || edgeSim < 0.55) {
+    return 0;
+  }
+
+  // Weighted fusion: Color layout (38%), Spatial edges (34%), Perceptual dHash (28%)
+  const confidence = (colorSim * 0.38) + (edgeSim * 0.34) + (hashSim * 0.28);
   return Math.min(1, Math.max(0, confidence));
 }
 
@@ -146,6 +156,7 @@ const projectFeatureCache = new Map<string, ImageFeatureVector>();
 
 export async function preloadProjectFeatures(projects: Project[]): Promise<void> {
   for (const project of projects) {
+    if (!project.markerImage) continue;
     if (projectFeatureCache.has(project.id)) continue;
     try {
       const img = new Image();
@@ -167,51 +178,63 @@ export function cacheProjectFeature(projectId: string, feature: ImageFeatureVect
   projectFeatureCache.set(projectId, feature);
 }
 
-// Scan a video element frame and match against registered projects
+/**
+ * Scan a live video stream from mobile phone or desktop camera and match against projects.
+ * Dynamically adjusts crop geometries based on mobile portrait (vh > vw) vs desktop/landscape (vw > vh).
+ */
 export async function matchFrameAgainstProjects(
   video: HTMLVideoElement,
   projects: Project[],
   processingCanvas: HTMLCanvasElement,
-  minConfidence: number = 0.68
+  minConfidence: number = 0.62
 ): Promise<MarkerMatchResult | null> {
-  if (!video.videoWidth || !video.videoHeight) return null;
+  if (!video.videoWidth || !video.videoHeight || projects.length === 0) return null;
 
   const ctx = processingCanvas.getContext('2d', { willReadFrequently: true });
   if (!ctx) return null;
 
-  // We sample 3 regions from the frame to handle different distances and centering:
-  // 1. Center crop (most common when user aims phone at poster)
-  // 2. Full frame
-  // 3. Wide center crop
   const vw = video.videoWidth;
   const vh = video.videoHeight;
+  const isPortrait = vh > vw;
 
-  const crops = [
-    // Center 60% crop
-    { sx: vw * 0.2, sy: vh * 0.2, sw: vw * 0.6, sh: vh * 0.6, weight: 1.05, box: { x: 0.2, y: 0.2, width: 0.6, height: 0.6 } },
-    // Center 80% crop
-    { sx: vw * 0.1, sy: vh * 0.1, sw: vw * 0.8, sh: vh * 0.8, weight: 1.0, box: { x: 0.1, y: 0.1, width: 0.8, height: 0.8 } },
-    // Full frame
-    { sx: 0, sy: 0, sw: vw, sh: vh, weight: 0.95, box: { x: 0, y: 0, width: 1.0, height: 1.0 } },
-  ];
+  // Adaptive Multi-Crop Matrix tailored for mobile phone camera orientation & desktop
+  const crops = isPortrait
+    ? [
+        // 1. Mobile Central Portrait Focus (typical phone scanning position)
+        { sx: vw * 0.1, sy: vh * 0.2, sw: vw * 0.8, sh: vh * 0.6, weight: 1.08, box: { x: 0.1, y: 0.2, width: 0.8, height: 0.6 } },
+        // 2. Mobile Central Square Crop
+        { sx: vw * 0.15, sy: (vh - vw * 0.7) / 2, sw: vw * 0.7, sh: vw * 0.7, weight: 1.05, box: { x: 0.15, y: 0.3, width: 0.7, height: 0.4 } },
+        // 3. Mobile Close-Up Center Crop (for scanning small details)
+        { sx: vw * 0.25, sy: vh * 0.3, sw: vw * 0.5, sh: vh * 0.4, weight: 1.0, box: { x: 0.25, y: 0.3, width: 0.5, height: 0.4 } },
+        // 4. Full Mobile Video Frame
+        { sx: 0, sy: 0, sw: vw, sh: vh, weight: 0.94, box: { x: 0, y: 0, width: 1.0, height: 1.0 } },
+      ]
+    : [
+        // 1. Central 60% Crop
+        { sx: vw * 0.2, sy: vh * 0.18, sw: vw * 0.6, sh: vh * 0.64, weight: 1.06, box: { x: 0.2, y: 0.18, width: 0.6, height: 0.64 } },
+        // 2. Central 80% Wide Crop
+        { sx: vw * 0.1, sy: vh * 0.1, sw: vw * 0.8, sh: vh * 0.8, weight: 1.0, box: { x: 0.1, y: 0.1, width: 0.8, height: 0.8 } },
+        // 3. Full Frame
+        { sx: 0, sy: 0, sw: vw, sh: vh, weight: 0.95, box: { x: 0, y: 0, width: 1.0, height: 1.0 } },
+      ];
 
   let bestResult: MarkerMatchResult | null = null;
   let highestScore = 0;
 
   for (const crop of crops) {
-    // 1. dHash canvas
+    // 1. dHash (9x8)
     processingCanvas.width = 9;
     processingCanvas.height = 8;
     ctx.drawImage(video, crop.sx, crop.sy, crop.sw, crop.sh, 0, 0, 9, 8);
     const dHash = computeDHash(ctx, 9, 8);
 
-    // 2. Color grid canvas
+    // 2. Color grid (8x8)
     processingCanvas.width = 8;
     processingCanvas.height = 8;
     ctx.drawImage(video, crop.sx, crop.sy, crop.sw, crop.sh, 0, 0, 8, 8);
     const colorGrid = computeColorGrid(ctx, 8);
 
-    // 3. Edge hist
+    // 3. Edge histogram (32x32)
     processingCanvas.width = 32;
     processingCanvas.height = 32;
     ctx.drawImage(video, crop.sx, crop.sy, crop.sw, crop.sh, 0, 0, 32, 32);
@@ -226,8 +249,7 @@ export async function matchFrameAgainstProjects(
 
     for (const project of projects) {
       let targetFeat = projectFeatureCache.get(project.id);
-      if (!targetFeat) {
-        // Fallback: extract on the fly
+      if (!targetFeat && project.markerImage) {
         try {
           const img = new Image();
           img.crossOrigin = 'anonymous';
@@ -259,6 +281,57 @@ export async function matchFrameAgainstProjects(
           },
         };
       }
+    }
+  }
+
+  return bestResult;
+}
+
+/**
+ * Match a static photo or captured mobile image against registered projects.
+ * Allows phones to snap photos directly or upload camera roll photos for instant matching.
+ */
+export async function matchImageFileAgainstProjects(
+  imageSource: HTMLImageElement | HTMLCanvasElement,
+  projects: Project[],
+  minConfidence: number = 0.58
+): Promise<MarkerMatchResult | null> {
+  const feat = await extractFeaturesFromImage(imageSource);
+  let bestResult: MarkerMatchResult | null = null;
+  let highestScore = 0;
+
+  for (const project of projects) {
+    let targetFeat = projectFeatureCache.get(project.id);
+    if (!targetFeat && project.markerImage) {
+      try {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        await new Promise<void>((resolve) => {
+          img.onload = () => resolve();
+          img.onerror = () => resolve();
+          img.src = project.markerImage;
+        });
+        if (img.naturalWidth > 0) {
+          targetFeat = await extractFeaturesFromImage(img);
+          projectFeatureCache.set(project.id, targetFeat);
+        }
+      } catch {
+        // ignore
+      }
+    }
+
+    if (!targetFeat) continue;
+    const score = compareFeatures(feat, targetFeat);
+
+    if (score > highestScore && score >= minConfidence) {
+      highestScore = score;
+      bestResult = {
+        projectId: project.id,
+        project,
+        confidence: Math.min(0.99, score),
+        boundingBox: { x: 0.05, y: 0.05, width: 0.9, height: 0.9 },
+        center: { x: 0.5, y: 0.5 },
+      };
     }
   }
 

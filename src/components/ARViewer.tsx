@@ -25,6 +25,7 @@ import { matchFrameAgainstProjects } from '../utils/visionTracker';
 import { Model3DViewer } from './Model3DViewer';
 import { VideoPlayerModal } from './VideoPlayerModal';
 import { StudentInfoModal } from './StudentInfoModal';
+import { StudentPipOverlay } from './StudentPipOverlay';
 
 interface ARViewerProps {
   projects: Project[];
@@ -178,7 +179,7 @@ export const ARViewer: React.FC<ARViewerProps> = ({
             videoRef.current,
             projects,
             processingCanvas,
-            0.65 // minimum confidence threshold
+            0.76 // strict minimum confidence threshold for accurate poster recognition
           );
 
           if (match) {
@@ -188,8 +189,8 @@ export const ARViewer: React.FC<ARViewerProps> = ({
               consecutiveMatchesRef.current = { id: match.projectId, count: 1 };
             }
 
-            // Lock onto marker after 2 stable consecutive frames
-            if (consecutiveMatchesRef.current.count >= 2) {
+            // Lock onto marker after 5 stable consecutive frames (strictly matches authentic student poster)
+            if (consecutiveMatchesRef.current.count >= 5) {
               setMatchResult(match);
               setLockConfidence(Math.round(match.confidence * 100));
 
@@ -502,6 +503,17 @@ export const ARViewer: React.FC<ARViewerProps> = ({
                     />
                   </div>
                 </div>
+              )}
+
+              {/* Student Recorded Video Presentation (Picture-in-Picture in viewfinder) */}
+              {isLocked && activeProject && activeModal === 'none' && (activeProject.studentVideoUrl || activeProject.videoUrl) && (
+                <StudentPipOverlay
+                  studentVideoUrl={activeProject.studentVideoUrl || activeProject.videoUrl}
+                  studentName={activeProject.studentName}
+                  studentAvatar={activeProject.studentAvatar}
+                  defaultPosition={activeProject.pipPosition || 'bottom-left'}
+                  className="z-25"
+                />
               )}
             </div>
 

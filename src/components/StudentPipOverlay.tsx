@@ -45,6 +45,20 @@ export const StudentPipOverlay: React.FC<StudentPipOverlayProps> = ({
     setPosition(defaultPosition);
   }, [defaultPosition]);
 
+  // Attempt initial playback respecting browser autoplay policies
+  useEffect(() => {
+    if (!videoRef.current) return;
+    const v = videoRef.current;
+    v.play().then(() => {
+      setIsPlaying(true);
+    }).catch(() => {
+      // Browser blocked unmuted autoplay, mute and retry smoothly
+      v.muted = true;
+      setIsMuted(true);
+      v.play().then(() => setIsPlaying(true)).catch(() => {});
+    });
+  }, [studentVideoUrl]);
+
   const togglePlay = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!videoRef.current) return;

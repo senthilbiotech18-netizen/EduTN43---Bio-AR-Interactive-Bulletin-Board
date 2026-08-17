@@ -21,7 +21,8 @@ import {
   Volume2,
   AlertTriangle,
   FolderPlus,
-  Box
+  Box,
+  QrCode
 } from 'lucide-react';
 import { Project, UserProfile } from '../types';
 import { deleteProject, deleteAllProjects, resetToDefaultProjects } from '../services/projectsService';
@@ -35,6 +36,7 @@ interface TeacherDashboardProps {
   onUserChange: (user: UserProfile | null) => void;
   onOpenARScanner: () => void;
   onOpenGallery: () => void;
+  onOpenMasterQR?: () => void;
   onOpen3DLibrary?: () => void;
   onOpenInstallModal?: () => void;
 }
@@ -45,6 +47,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
   onUserChange,
   onOpenARScanner,
   onOpenGallery,
+  onOpenMasterQR,
   onOpen3DLibrary,
   onOpenInstallModal,
 }) => {
@@ -193,6 +196,18 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
               >
                 <LogIn className="w-4 h-4 text-[#2D5A27]" />
                 <span>Sign in with Google</span>
+              </button>
+            )}
+
+            {onOpenMasterQR && (
+              <button
+                id="btn-open-master-qr-dashboard"
+                onClick={onOpenMasterQR}
+                className="flex items-center gap-1.5 px-4 py-2.5 rounded-2xl bg-emerald-700 hover:bg-emerald-600 active:scale-98 text-white text-xs font-bold transition shadow-sm"
+                title="Classroom Master QR Banner for Parents"
+              >
+                <QrCode className="w-4 h-4 text-emerald-200" />
+                <span>Bulletin Board QR</span>
               </button>
             )}
 

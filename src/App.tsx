@@ -8,6 +8,7 @@ import { PostersGalleryModal } from './components/PostersGalleryModal';
 import { ModelLibraryModal } from './components/ModelLibraryModal';
 import { ProjectCreatorModal } from './components/ProjectCreatorModal';
 import { DesktopInstallModal } from './components/DesktopInstallModal';
+import { MasterQRModal } from './components/MasterQRModal';
 import { auth } from './firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 
@@ -16,6 +17,7 @@ export default function App() {
   const [currentView, setCurrentView] = useState<ViewMode>('ar_scanner');
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [is3DLibraryOpen, setIs3DLibraryOpen] = useState(false);
+  const [isMasterQROpen, setIsMasterQROpen] = useState(false);
   const [projectToCreateFromModel, setProjectToCreateFromModel] = useState<Project | null>(null);
   const [isCreatorOpenFromLibrary, setIsCreatorOpenFromLibrary] = useState(false);
 
@@ -112,6 +114,7 @@ export default function App() {
         onViewChange={setCurrentView}
         onOpenGallery={() => setIsGalleryOpen(true)}
         onOpen3DLibrary={() => setIs3DLibraryOpen(true)}
+        onOpenMasterQR={() => setIsMasterQROpen(true)}
         onOpenInstallModal={() => setIsInstallModalOpen(true)}
         projectCount={projects.length}
       />
@@ -133,6 +136,7 @@ export default function App() {
             onUserChange={setCurrentUser}
             onOpenARScanner={() => setCurrentView('ar_scanner')}
             onOpenGallery={() => setIsGalleryOpen(true)}
+            onOpenMasterQR={() => setIsMasterQROpen(true)}
             onOpen3DLibrary={() => setIs3DLibraryOpen(true)}
             onOpenInstallModal={() => setIsInstallModalOpen(true)}
           />
@@ -155,9 +159,18 @@ export default function App() {
         <PostersGalleryModal
           projects={projects}
           onClose={() => setIsGalleryOpen(false)}
+          onOpenMasterQR={() => setIsMasterQROpen(true)}
           onSelectPosterForAR={(selectedProject) => {
             setCurrentView('ar_scanner');
           }}
+        />
+      )}
+
+      {/* Classroom Bulletin Board Master QR Banner Modal */}
+      {isMasterQROpen && (
+        <MasterQRModal
+          projects={projects}
+          onClose={() => setIsMasterQROpen(false)}
         />
       )}
 

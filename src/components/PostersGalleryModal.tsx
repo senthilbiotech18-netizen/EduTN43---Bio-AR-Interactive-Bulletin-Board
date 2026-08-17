@@ -9,7 +9,8 @@ import {
   Check, 
   ExternalLink,
   Layers,
-  Film
+  Film,
+  QrCode
 } from 'lucide-react';
 import { Project } from '../types';
 
@@ -17,12 +18,14 @@ interface PostersGalleryModalProps {
   projects: Project[];
   onClose: () => void;
   onSelectPosterForAR: (project: Project) => void;
+  onOpenMasterQR?: () => void;
 }
 
 export const PostersGalleryModal: React.FC<PostersGalleryModalProps> = ({
   projects,
   onClose,
   onSelectPosterForAR,
+  onOpenMasterQR,
 }) => {
   const [activeProject, setActiveProject] = useState<Project>(projects[0] || null);
 
@@ -165,6 +168,21 @@ export const PostersGalleryModal: React.FC<PostersGalleryModalProps> = ({
                   <Sparkles className="w-4 h-4" />
                   <span>Test in Live AR Scanner</span>
                 </button>
+
+                {onOpenMasterQR && (
+                  <button
+                    id="btn-gallery-open-master-qr"
+                    onClick={() => {
+                      onClose();
+                      onOpenMasterQR();
+                    }}
+                    className="flex items-center gap-1.5 py-3 px-4 rounded-2xl bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs shadow-xs transition"
+                    title="Get Bulletin Board Master QR Banner"
+                  >
+                    <QrCode className="w-4 h-4 text-emerald-200" />
+                    <span>Board Master QR</span>
+                  </button>
+                )}
 
                 <button
                   id="btn-download-active-poster"

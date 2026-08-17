@@ -12,7 +12,8 @@ import {
   Box, 
   Plus,
   Download,
-  Laptop
+  Laptop,
+  QrCode
 } from 'lucide-react';
 import { ViewMode } from '../types';
 
@@ -21,6 +22,7 @@ interface NavbarProps {
   onViewChange: (mode: ViewMode) => void;
   onOpenGallery: () => void;
   onOpen3DLibrary: () => void;
+  onOpenMasterQR?: () => void;
   onOpenInstallModal?: () => void;
   projectCount: number;
   isInstallable?: boolean;
@@ -31,6 +33,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onViewChange,
   onOpenGallery,
   onOpen3DLibrary,
+  onOpenMasterQR,
   onOpenInstallModal,
   projectCount,
   isInstallable = true,
@@ -104,6 +107,19 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Right Tools */}
         <div className="flex items-center gap-2">
+          {onOpenMasterQR && (
+            <button
+              id="btn-nav-master-qr"
+              type="button"
+              onClick={onOpenMasterQR}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition hover:scale-105"
+              title="Get Board Master QR Code for Parents"
+            >
+              <QrCode className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Board QR</span>
+            </button>
+          )}
+
           {onOpenInstallModal && (
             <button
               id="btn-nav-install-desktop"
@@ -113,7 +129,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               title="Download / Install Desktop App for Chromebook, Windows, Mac"
             >
               <Download className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400" />
-              <span className="hidden sm:inline">Install App</span>
+              <span className="hidden md:inline">Install</span>
             </button>
           )}
 
@@ -135,3 +151,4 @@ export const Navbar: React.FC<NavbarProps> = ({
     </header>
   );
 };
+
